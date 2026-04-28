@@ -1,0 +1,17 @@
+# Raw CST simulation data files
+experiment_2/data/antenna_s11_data_400.txt
+experiment_2/data/antenna_freq_data_400.txt
+experiment_1/antenna_s11_data.txt
+experiment_1/antenna_freq_data.txt
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# VS Code
+.vscode/
+
+# Windows
+Thumbs.db
+desktop.ini
