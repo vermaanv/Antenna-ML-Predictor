@@ -52,7 +52,7 @@ xgb_freq, rf_s11, rf_class = load_models()
 df = load_data()
 
 # ── Sidebar Navigation ────────────────────────────────────────
-st.sidebar.image("https://img.icons8.com/color/96/antenna.png", width=80)
+st.sidebar.markdown("# 📡")
 st.sidebar.title("📡 Antenna ML Predictor")
 st.sidebar.markdown("---")
 
