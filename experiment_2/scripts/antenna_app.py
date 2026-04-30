@@ -5,15 +5,21 @@
 #              prediction using trained ML models
 # ============================================================
 
-import streamlit as st
-import pandas as pd
-import numpy as np
+import os
 import pickle
-import plotly.graph_objects as go
+import warnings
+
+import numpy as np
+import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
+import streamlit as st
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score, mean_absolute_error, confusion_matrix
 from sklearn.model_selection import train_test_split
-import warnings
+from xgboost import XGBRegressor
+
 warnings.filterwarnings('ignore')
 
 # ── Page Configuration ────────────────────────────────────────
@@ -23,21 +29,24 @@ st.set_page_config(
     layout="wide"
 )
 
+# ── Base Directory ────────────────────────────────────────────
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # ── Load Trained Models ───────────────────────────────────────
 @st.cache_resource
 def load_models():
-    with open('../models/xgb_freq.pkl', 'rb') as f:
+    with open(os.path.join(BASE_DIR, '../models/xgb_freq.pkl'), 'rb') as f:
         xgb_freq = pickle.load(f)
-    with open('../models/rf_s11.pkl', 'rb') as f:
+    with open(os.path.join(BASE_DIR, '../models/rf_s11.pkl'), 'rb') as f:
         rf_s11 = pickle.load(f)
-    with open('../models/rf_class.pkl', 'rb') as f:
+    with open(os.path.join(BASE_DIR, '../models/rf_class.pkl'), 'rb') as f:
         rf_class = pickle.load(f)
     return xgb_freq, rf_s11, rf_class
 
 # ── Load Dataset ──────────────────────────────────────────────
 @st.cache_data
 def load_data():
-    return pd.read_csv('../data/antenna_dataset_400.csv')
+    return pd.read_csv(os.path.join(BASE_DIR, '../data/antenna_dataset_400.csv'))
 
 xgb_freq, rf_s11, rf_class = load_models()
 df = load_data()
@@ -71,7 +80,6 @@ if page == "🎯 Antenna Predictor":
     st.markdown("Enter antenna dimensions to predict performance instantly.")
     st.markdown("---")
 
-    # Input sliders
     col1, col2 = st.columns(2)
 
     with col1:
@@ -92,21 +100,16 @@ if page == "🎯 Antenna Predictor":
     with col2:
         st.subheader("📊 Predicted Performance")
 
-        # Predict button
         if st.button("🔮 Predict Now", use_container_width=True):
 
-            # Prepare input
             input_data = np.array([[PL, PW, INL, ML]])
 
-            # Predictions
             freq_pred  = xgb_freq.predict(input_data)[0]
             s11_pred   = rf_s11.predict(input_data)[0]
             class_pred = rf_class.predict(input_data)[0]
 
-            # Display results
             st.markdown("### Results:")
 
-            # Frequency result
             col_a, col_b = st.columns(2)
             with col_a:
                 st.metric(
@@ -120,7 +123,6 @@ if page == "🎯 Antenna Predictor":
                     value=f"{s11_pred:.2f} dB"
                 )
 
-            # Good/Bad classification
             if class_pred == 1:
                 st.success("✅ GOOD ANTENNA — S11 < -10 dB")
             else:
@@ -151,7 +153,7 @@ if page == "🎯 Antenna Predictor":
             fig.update_layout(height=300)
             st.plotly_chart(fig, use_container_width=True)
 
-            # Frequency bar
+            # Frequency Gauge chart
             fig2 = go.Figure(go.Indicator(
                 mode="gauge+number+delta",
                 value=freq_pred,
@@ -161,9 +163,9 @@ if page == "🎯 Antenna Predictor":
                     'axis': {'range': [2.0, 3.0]},
                     'bar': {'color': "royalblue"},
                     'steps': [
-                        {'range': [2.0,  2.3], 'color': "lightcoral"},
-                        {'range': [2.3,  2.5], 'color': "lightgreen"},
-                        {'range': [2.5,  3.0], 'color': "lightcoral"}
+                        {'range': [2.0, 2.3], 'color': "lightcoral"},
+                        {'range': [2.3, 2.5], 'color': "lightgreen"},
+                        {'range': [2.5, 3.0], 'color': "lightcoral"}
                     ],
                     'threshold': {
                         'line': {'color': "red", 'width': 4},
@@ -201,10 +203,6 @@ elif page == "📊 Model Performance":
     st.markdown("---")
 
     # ── Prepare data for plots ────────────────────────────────
-    from sklearn.ensemble import RandomForestRegressor
-    from sklearn.linear_model import LinearRegression
-    from xgboost import XGBRegressor
-
     X      = df[['PL', 'PW', 'INL', 'ML']]
     y_freq = df['Frequency']
     y_s11  = df['S11']
@@ -214,16 +212,16 @@ elif page == "📊 Model Performance":
     _, _, ys_train, ys_test = train_test_split(
         X, y_s11, test_size=0.2, random_state=42)
 
-    # Train all models
+    # ── Train all models ──────────────────────────────────────
     models_freq = {
         'Linear Regression': LinearRegression(),
-        'Random Forest': RandomForestRegressor(n_estimators=100, random_state=42),
-        'XGBoost': XGBRegressor(n_estimators=100, random_state=42)
+        'Random Forest'    : RandomForestRegressor(n_estimators=100, random_state=42),
+        'XGBoost'          : XGBRegressor(n_estimators=100, random_state=42)
     }
     models_s11 = {
         'Linear Regression': LinearRegression(),
-        'Random Forest': RandomForestRegressor(n_estimators=100, random_state=42),
-        'XGBoost': XGBRegressor(n_estimators=100, random_state=42)
+        'Random Forest'    : RandomForestRegressor(n_estimators=100, random_state=42),
+        'XGBoost'          : XGBRegressor(n_estimators=100, random_state=42)
     }
 
     freq_preds = {}
@@ -231,8 +229,8 @@ elif page == "📊 Model Performance":
         model.fit(X_train, yf_train)
         freq_preds[name] = {
             'pred': model.predict(X_test),
-            'r2': r2_score(yf_test, model.predict(X_test)),
-            'mae': mean_absolute_error(yf_test, model.predict(X_test))
+            'r2'  : r2_score(yf_test, model.predict(X_test)),
+            'mae' : mean_absolute_error(yf_test, model.predict(X_test))
         }
 
     s11_preds = {}
@@ -240,8 +238,8 @@ elif page == "📊 Model Performance":
         model.fit(X_train, ys_train)
         s11_preds[name] = {
             'pred': model.predict(X_test),
-            'r2': r2_score(ys_test, model.predict(X_test)),
-            'mae': mean_absolute_error(ys_test, model.predict(X_test))
+            'r2'  : r2_score(ys_test, model.predict(X_test)),
+            'mae' : mean_absolute_error(ys_test, model.predict(X_test))
         }
 
     # ── R² bar charts ─────────────────────────────────────────
@@ -337,7 +335,6 @@ elif page == "🗄️ Dataset Explorer":
     st.title("🗄️ Dataset Explorer")
     st.markdown("---")
 
-    # Dataset info
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("Total Samples", "260")
@@ -348,16 +345,14 @@ elif page == "🗄️ Dataset Explorer":
 
     st.markdown("---")
 
-    # Dataset table
     st.subheader("📋 Dataset Preview")
     st.dataframe(df, use_container_width=True)
 
     st.markdown("---")
 
-    # Parameter distributions
     st.subheader("📊 Parameter Distributions")
-
     col1, col2 = st.columns(2)
+
     with col1:
         fig = px.histogram(df, x='PL',
                           title='Patch Length Distribution',
@@ -382,7 +377,6 @@ elif page == "🗄️ Dataset Explorer":
 
     st.markdown("---")
 
-    # S11 vs Frequency scatter
     st.subheader("📡 S11 vs Resonant Frequency")
     fig5 = px.scatter(
         df, x='Frequency', y='S11',
@@ -390,8 +384,8 @@ elif page == "🗄️ Dataset Explorer":
         title='S11 vs Resonant Frequency (colored by Feed Length)',
         labels={
             'Frequency': 'Resonant Frequency (GHz)',
-            'S11': 'S11 (dB)',
-            'ML': 'Feed Length (mm)'
+            'S11'      : 'S11 (dB)',
+            'ML'       : 'Feed Length (mm)'
         }
     )
     fig5.add_hline(y=-10, line_dash="dash",
