@@ -7,7 +7,11 @@
 import os
 import pickle
 import streamlit as st
-from tensorflow.keras.models import load_model
+
+try:
+    from tensorflow.keras.models import load_model
+except:
+    from tf_keras.models import load_model
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

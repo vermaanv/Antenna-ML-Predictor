@@ -11,9 +11,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBRegressor, XGBClassifier
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.callbacks import EarlyStopping
+
+try:
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Dense, Dropout
+    from tensorflow.keras.callbacks import EarlyStopping
+except:
+    from tf_keras.models import Sequential
+    from tf_keras.layers import Dense, Dropout
+    from tf_keras.callbacks import EarlyStopping
+
 import pickle
 
 # ── Load Dataset ──────────────────────────────────────────────

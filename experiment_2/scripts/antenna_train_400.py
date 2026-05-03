@@ -19,9 +19,16 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBRegressor
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.callbacks import EarlyStopping
+
+try:
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Dense, Dropout
+    from tensorflow.keras.callbacks import EarlyStopping
+except:
+    from tf_keras.models import Sequential
+    from tf_keras.layers import Dense, Dropout
+    from tf_keras.callbacks import EarlyStopping
+    
 import warnings
 warnings.filterwarnings('ignore')
 

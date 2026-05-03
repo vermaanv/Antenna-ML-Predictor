@@ -5,5 +5,5 @@ scikit-learn
 xgboost
 plotly
 scipy
-tensorflow
+tf-keras
 matplotlib
