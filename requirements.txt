@@ -4,3 +4,6 @@ numpy
 scikit-learn
 xgboost
 plotly
+scipy
+tensorflow
+matplotlib
