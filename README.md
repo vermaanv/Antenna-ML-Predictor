@@ -1,11 +1,5 @@
 # ML-Assisted Microstrip Patch Antenna Design and Performance Prediction
 
-**B.Tech Final Year Project**
-**Department of Electronics and Communication Engineering**
-**Academic Year: 2025-26**
-
----
-
 ## Abstract
 
 Traditional microstrip patch antenna design relies on time-consuming full-wave electromagnetic simulations in software like CST Microwave Studio. Each design iteration takes 3-5 minutes, making the optimization process slow and inefficient. This project develops an end-to-end Machine Learning based surrogate model that replaces repetitive CST simulations with instant ML predictions. The system achieves 99.94% accuracy for resonant frequency prediction and introduces an inverse design optimizer that suggests optimal antenna dimensions for any target frequency with less than 1% error — reducing design time from hours to seconds.
